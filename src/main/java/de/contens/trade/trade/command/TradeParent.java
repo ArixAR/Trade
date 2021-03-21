@@ -110,7 +110,7 @@ public class TradeParent extends ParentCommand {
                             player.sendMessage(Messages.TRADE_IGNORE.getMessage(tradePlayer.getName()));
                         }
                     }
-                }.runTaskLaterAsynchronously(trade, 20 * 50);
+                }.runTaskLaterAsynchronously(trade, 20 * 5);
 
             } else
                 player.sendMessage(Messages.TRADE_ALREADY_PENDING.getMessage());
