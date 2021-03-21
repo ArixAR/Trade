@@ -33,10 +33,14 @@
 
 package de.contens.trade.command;
 
+import de.contens.trade.trade.command.child.AcceptRequest;
+
 /**
  * @author Contens
  * @created 21.03.2021
  */
 
 public interface CommandFactory {
+
+    AcceptRequest createAcceptRequest();
 }
