@@ -31,66 +31,47 @@
  *  *****************************************************************************
  */
 
-package de.contens.trade;
+package de.contens.trade.utils;
 
-import com.google.inject.AbstractModule;
-import com.google.inject.Guice;
-import com.google.inject.Injector;
-import de.contens.trade.command.CommandModule;
-import de.contens.trade.utils.reflection.Reflection;
-import org.bukkit.Bukkit;
-import org.bukkit.command.Command;
-import org.bukkit.command.CommandMap;
-import org.bukkit.event.Listener;
-import org.bukkit.plugin.java.JavaPlugin;
-
-import java.lang.reflect.Field;
-import java.util.logging.Logger;
+import lombok.AllArgsConstructor;
 
 /**
  * @author Contens
  * @created 21.03.2021
  */
 
-public class TradePlugin extends JavaPlugin {
+@AllArgsConstructor
+public enum Messages {
 
-    private static Logger logger;
+    ERROR("§cEin Fehler ist aufgetreten.", true, true);
 
-    @Override
-    public void onEnable() {
-        Injector injector = Guice.createInjector(new AbstractModule() {
-            @Override
-            protected void configure() {
-                bind(TradePlugin.class).toInstance(TradePlugin.this);
-            }
-        }, new CommandModule());
+    private String message;
 
-        Command[] commands = new Command[] {
+    private boolean prefix;
+    private boolean autoFormat;
 
-        };
+    public String getMessage(Object... args) {
+        String message = this.message;
+        if (this.prefix) message = Statics.PREFIX + message;
 
-        for (Command command : commands) {
-            try {
-                Field commandMapField = Reflection.getField(Bukkit.getServer().getClass(), "commandMap");
-
-                CommandMap commandMap = (CommandMap) commandMapField.get(Bukkit.getServer());
-
-                commandMap.register(command.getName(), command);
-            } catch (Exception ex) {
-                ex.printStackTrace();
-            }
+        for (int i = 0; i < args.length; i++)
+            message = message.replace("{" + i + "}", args[i].toString());
+        if (this.autoFormat) {
+            message = message.replaceAll("%NUM%", Statics.NUMBERS);
+            message = message.replaceAll("%TXT%", Statics.DEFAULT_TEXT);
+            message = message.replaceAll("%PNC%", Statics.PUNCTUATION_MARK);
+            message = message.replaceAll("%ERR%", Statics.ERROR);
         }
 
-        Listener[] listeners = new Listener[] {
-
-        };
-
-        for (Listener listener : listeners) {
-            this.getServer().getPluginManager().registerEvents(listener, this);
-        }
+        return message;
     }
 
-    public static Logger getLog() {
-        return logger;
+    private class Statics {
+        static final String PREFIX = "§eHandel §8× §7";
+
+        static final String NUMBERS = "§e";
+        static final String DEFAULT_TEXT = "§7";
+        static final String PUNCTUATION_MARK = "§8";
+        static final String ERROR = "§c";
     }
 }

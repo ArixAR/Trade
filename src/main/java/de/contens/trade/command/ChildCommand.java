@@ -31,66 +31,26 @@
  *  *****************************************************************************
  */
 
-package de.contens.trade;
+package de.contens.trade.command;
 
-import com.google.inject.AbstractModule;
-import com.google.inject.Guice;
-import com.google.inject.Injector;
-import de.contens.trade.command.CommandModule;
-import de.contens.trade.utils.reflection.Reflection;
-import org.bukkit.Bukkit;
-import org.bukkit.command.Command;
-import org.bukkit.command.CommandMap;
-import org.bukkit.event.Listener;
-import org.bukkit.plugin.java.JavaPlugin;
-
-import java.lang.reflect.Field;
-import java.util.logging.Logger;
+import org.bukkit.command.CommandSender;
 
 /**
  * @author Contens
  * @created 21.03.2021
  */
 
-public class TradePlugin extends JavaPlugin {
+public abstract class ChildCommand {
 
-    private static Logger logger;
+    private String name;
 
-    @Override
-    public void onEnable() {
-        Injector injector = Guice.createInjector(new AbstractModule() {
-            @Override
-            protected void configure() {
-                bind(TradePlugin.class).toInstance(TradePlugin.this);
-            }
-        }, new CommandModule());
-
-        Command[] commands = new Command[] {
-
-        };
-
-        for (Command command : commands) {
-            try {
-                Field commandMapField = Reflection.getField(Bukkit.getServer().getClass(), "commandMap");
-
-                CommandMap commandMap = (CommandMap) commandMapField.get(Bukkit.getServer());
-
-                commandMap.register(command.getName(), command);
-            } catch (Exception ex) {
-                ex.printStackTrace();
-            }
-        }
-
-        Listener[] listeners = new Listener[] {
-
-        };
-
-        for (Listener listener : listeners) {
-            this.getServer().getPluginManager().registerEvents(listener, this);
-        }
+    public ChildCommand(String name) {
+        this.name = name;
     }
 
-    public static Logger getLog() {
-        return logger;
+    public abstract void execute(CommandSender sender, String[] args);
+
+    public String getName() {
+        return name;
     }
 }

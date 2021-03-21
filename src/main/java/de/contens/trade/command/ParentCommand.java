@@ -31,66 +31,52 @@
  *  *****************************************************************************
  */
 
-package de.contens.trade;
+package de.contens.trade.command;
 
-import com.google.inject.AbstractModule;
-import com.google.inject.Guice;
-import com.google.inject.Injector;
-import de.contens.trade.command.CommandModule;
-import de.contens.trade.utils.reflection.Reflection;
-import org.bukkit.Bukkit;
+import com.google.common.collect.Lists;
 import org.bukkit.command.Command;
-import org.bukkit.command.CommandMap;
-import org.bukkit.event.Listener;
-import org.bukkit.plugin.java.JavaPlugin;
-
-import java.lang.reflect.Field;
-import java.util.logging.Logger;
+import org.bukkit.command.CommandSender;
 
 /**
  * @author Contens
  * @created 21.03.2021
  */
 
-public class TradePlugin extends JavaPlugin {
+public abstract class ParentCommand extends Command {
 
-    private static Logger logger;
+    private ChildCommand[] childCommands;
+
+    public ParentCommand(String name, String description, String usageMessage, ChildCommand... childCommands) {
+        super(name, description, usageMessage, Lists.newArrayList());
+
+        this.childCommands = childCommands;
+    }
 
     @Override
-    public void onEnable() {
-        Injector injector = Guice.createInjector(new AbstractModule() {
-            @Override
-            protected void configure() {
-                bind(TradePlugin.class).toInstance(TradePlugin.this);
+    public boolean execute(CommandSender sender, String commandLabel, String[] args) {
+        if (args.length > 0) {
+            ChildCommand command = null;
+
+            for (ChildCommand childCommand : childCommands) {
+                if (childCommand.getName().equalsIgnoreCase(args[0])) {
+                    command = childCommand;
+
+                    break;
+                }
             }
-        }, new CommandModule());
 
-        Command[] commands = new Command[] {
+            if (command != null) {
+                String[] trimedArgs = new String[args.length - 1];
 
-        };
+                System.arraycopy(args, 1, trimedArgs, 0, args.length - 1);
 
-        for (Command command : commands) {
-            try {
-                Field commandMapField = Reflection.getField(Bukkit.getServer().getClass(), "commandMap");
-
-                CommandMap commandMap = (CommandMap) commandMapField.get(Bukkit.getServer());
-
-                commandMap.register(command.getName(), command);
-            } catch (Exception ex) {
-                ex.printStackTrace();
-            }
+                command.execute(sender, trimedArgs);
+            } else
+                defaultScope(sender, args);
         }
 
-        Listener[] listeners = new Listener[] {
-
-        };
-
-        for (Listener listener : listeners) {
-            this.getServer().getPluginManager().registerEvents(listener, this);
-        }
+        return true;
     }
 
-    public static Logger getLog() {
-        return logger;
-    }
+    public abstract void defaultScope(CommandSender sender, String[] args);
 }

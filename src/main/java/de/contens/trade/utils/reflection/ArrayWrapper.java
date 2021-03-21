@@ -31,66 +31,71 @@
  *  *****************************************************************************
  */
 
-package de.contens.trade;
+package de.contens.trade.utils.reflection;
 
-import com.google.inject.AbstractModule;
-import com.google.inject.Guice;
-import com.google.inject.Injector;
-import de.contens.trade.command.CommandModule;
-import de.contens.trade.utils.reflection.Reflection;
-import org.bukkit.Bukkit;
-import org.bukkit.command.Command;
-import org.bukkit.command.CommandMap;
-import org.bukkit.event.Listener;
-import org.bukkit.plugin.java.JavaPlugin;
+import org.apache.commons.lang.Validate;
 
-import java.lang.reflect.Field;
-import java.util.logging.Logger;
+import java.lang.reflect.Array;
+import java.util.Arrays;
+import java.util.Collection;
 
 /**
  * @author Contens
  * @created 21.03.2021
  */
 
-public class TradePlugin extends JavaPlugin {
+public final class ArrayWrapper<E> {
+    private E[] _array;
 
-    private static Logger logger;
-
-    @Override
-    public void onEnable() {
-        Injector injector = Guice.createInjector(new AbstractModule() {
-            @Override
-            protected void configure() {
-                bind(TradePlugin.class).toInstance(TradePlugin.this);
-            }
-        }, new CommandModule());
-
-        Command[] commands = new Command[] {
-
-        };
-
-        for (Command command : commands) {
-            try {
-                Field commandMapField = Reflection.getField(Bukkit.getServer().getClass(), "commandMap");
-
-                CommandMap commandMap = (CommandMap) commandMapField.get(Bukkit.getServer());
-
-                commandMap.register(command.getName(), command);
-            } catch (Exception ex) {
-                ex.printStackTrace();
-            }
-        }
-
-        Listener[] listeners = new Listener[] {
-
-        };
-
-        for (Listener listener : listeners) {
-            this.getServer().getPluginManager().registerEvents(listener, this);
-        }
+    public ArrayWrapper(E... elements) {
+        setArray(elements);
     }
 
-    public static Logger getLog() {
-        return logger;
+    @SuppressWarnings("unchecked")
+    public static <T> T[] toArray(Iterable<? extends T> list, Class<T> c) {
+        int size = -1;
+        if (list instanceof Collection<?>) {
+            @SuppressWarnings("rawtypes")
+            Collection coll = (Collection) list;
+            size = coll.size();
+        }
+
+        if (size < 0) {
+            size = 0;
+
+            for (@SuppressWarnings("unused") T element : list) {
+                size++;
+            }
+        }
+
+        T[] result = (T[]) Array.newInstance(c, size);
+        int i = 0;
+        for (T element : list) {
+            result[i++] = element;
+        }
+        return result;
+    }
+
+    public E[] getArray() {
+        return _array;
+    }
+
+    public void setArray(E[] array) {
+        Validate.notNull(array, "The array can not be null");
+        _array = array;
+    }
+
+    @SuppressWarnings("rawtypes")
+    @Override
+    public boolean equals(Object other) {
+        if (!(other instanceof ArrayWrapper)) {
+            return false;
+        }
+        return Arrays.equals(_array, ((ArrayWrapper) other)._array);
+    }
+
+    @Override
+    public int hashCode() {
+        return Arrays.hashCode(_array);
     }
 }
