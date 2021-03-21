@@ -33,7 +33,19 @@
 
 package de.contens.trade.trade;
 
+import com.google.common.primitives.Ints;
+import com.google.inject.Inject;
+import com.google.inject.assistedinject.Assisted;
 import de.contens.trade.TradePlugin;
+import de.contens.trade.utils.Messages;
+import org.bukkit.Bukkit;
+import org.bukkit.Material;
+import org.bukkit.entity.Player;
+import org.bukkit.inventory.Inventory;
+import org.bukkit.inventory.ItemStack;
+import org.bukkit.inventory.meta.ItemMeta;
+
+import java.util.stream.IntStream;
 
 /**
  * @author Contens
@@ -45,8 +57,156 @@ public class Trade {
     private TradePlugin trade;
     private TradeMap tradeMap;
 
-    public Trade(TradePlugin trade, TradeMap tradeMap) {
+    private Inventory inventory;
+
+    private Player player1;
+    private Player player2;
+
+    private int[] left = new int[] { 10, 11, 12, 19, 20, 21, 28, 29, 30, 37, 38, 39, 40 };
+    private int[] right = new int[] { 14, 15, 16, 23, 24, 25, 32, 33, 34, 41, 42, 43, 44 };
+
+    @Inject
+    public Trade(@Assisted("player1") Player player1, @Assisted("player2") Player player2, TradePlugin trade, TradeMap tradeMap) {
+        this.player1 = player1;
+        this.player2 = player2;
+
         this.trade = trade;
         this.tradeMap = tradeMap;
+
+        this.inventory = Bukkit.createInventory(null, 9 * 6, "§6Handeln");
+
+        player1.openInventory(inventory);
+        player2.openInventory(inventory);
+
+        ItemStack glass = new ItemStack(Material.BLACK_STAINED_GLASS_PANE);
+        ItemStack terracotta = new ItemStack(Material.RED_TERRACOTTA);
+        ItemStack tradeInfo = new ItemStack(Material.NAME_TAG);
+
+        ItemMeta glassMeta = glass.getItemMeta();
+        ItemMeta terracottaMeta = terracotta.getItemMeta();
+        ItemMeta tradeInfoMeta = tradeInfo.getItemMeta();
+
+        glassMeta.setDisplayName(" ");
+        terracottaMeta.setDisplayName("§7§lBESTÄTIGEN");
+        tradeInfoMeta.setDisplayName("§e" + player1.getName() + "§7│ §e" + player2.getName());
+
+        glass.setItemMeta(glassMeta);
+        terracotta.setItemMeta(terracottaMeta);
+        tradeInfo.setItemMeta(tradeInfoMeta);
+
+        IntStream.of(0, 1, 2, 3, 5, 6, 7, 8, 9, 13, 17, 18, 22, 26, 27, 31, 35, 36, 40, 44, 45, 46, 48, 49, 50, 52, 53).forEach(slot -> inventory.setItem(slot, glass));
+
+        inventory.setItem(47, terracotta);
+        inventory.setItem(51, terracotta);
+        inventory.setItem(4, tradeInfo);
+
+        tradeMap.put(player1.getName(), this);
+        tradeMap.put(player2.getName(), this);
+    }
+
+    public void addItem(Player player, ItemStack itemStack, int clickedSlot) {
+        int[] slots = player == player1 ? left : right;
+
+        for (int i : slots) {
+            if (inventory.getItem(i) == null) {
+                if (i != slots[slots.length - 1]) {
+                    inventory.setItem(i, itemStack);
+
+                    player.getInventory().setItem(clickedSlot, null);
+
+                    break;
+                }
+            }
+        }
+    }
+
+    public void removeItem(Player player, int slot) {
+        int[] slots = player == player1 ? left : right;
+
+        if (Ints.asList(slots).contains(slot)) {
+            ItemStack clicked = inventory.getItem(slot);
+
+            if (clicked != null) {
+                player.getInventory().addItem(clicked);
+
+                inventory.setItem(slot, null);
+            }
+        }
+    }
+
+    private void remove() {
+        tradeMap.remove(player1.getName());
+        tradeMap.remove(player2.getName());
+
+        player1.getOpenInventory().close();
+        player2.getOpenInventory().close();
+    }
+
+    public void abort() {
+        this.remove();
+
+        for (int i : left) {
+            ItemStack itemStack = inventory.getItem(i);
+
+            if (itemStack != null) {
+                player1.getInventory().addItem(itemStack);
+            }
+        }
+
+        for (int i : right) {
+            ItemStack itemStack = inventory.getItem(i);
+
+            if (itemStack != null) {
+                player2.getInventory().addItem(itemStack);
+            }
+        }
+
+        player1.sendMessage(Messages.TRADE_ABORT.getMessage());
+        player2.sendMessage(Messages.TRADE_ABORT.getMessage());
+    }
+
+    private void succeed() {
+        this.remove();
+
+        for (int i : left) {
+            ItemStack itemStack = inventory.getItem(i);
+
+            if (itemStack != null) {
+                player2.getInventory().addItem(itemStack);
+            }
+        }
+
+        for (int i : right) {
+            ItemStack itemStack = inventory.getItem(i);
+
+            if (itemStack != null) {
+                player1.getInventory().addItem(itemStack);
+            }
+        }
+    }
+
+    public void handleConfirmation(Player player, int slot) {
+        ItemStack clicked = inventory.getItem(slot);
+        ItemMeta clickedMeta = inventory.getItem(slot).getItemMeta();
+
+        if ((player == player1 && slot == 47) || (player == player2 && slot == 51)) {
+            if (clicked.getType() == Material.LIME_TERRACOTTA) {
+                clicked.setType(Material.RED_TERRACOTTA);
+                clickedMeta.setDisplayName("§a§lBESTÄTIGT");
+                clicked.setItemMeta(clickedMeta);
+            } else if (clicked.getType() == Material.RED_TERRACOTTA) {
+                clicked.setType(Material.LIME_TERRACOTTA);
+                clickedMeta.setDisplayName("§7§lBESTÄTIGEN");
+                clicked.setItemMeta(clickedMeta);
+            }
+        }
+
+        if (inventory.getItem(47).getType() == Material.LIME_TERRACOTTA && inventory.getItem(51).getType() == Material.LIME_TERRACOTTA) {
+            this.succeed();
+        }
+    }
+
+    public interface Factory {
+        Trade createTrade(@Assisted("player1") Player player1, @Assisted("player2") Player player2);
     }
 }
