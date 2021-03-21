@@ -1,7 +1,7 @@
 name: Trade
-version: ${project.version}
-main: de.contens.trade.Trade
+version: 1.0
+main: de.contens.trade.TradePlugin
 api-version: 1.16
-authors: Contens
+author: Contens
 description: Simple trade plugin
 website: https://contens.dev

@@ -31,23 +31,58 @@
  *  *****************************************************************************
  */
 
-package de.contens.trade.trade;
+package de.contens.trade.trade.listener;
 
-import com.google.inject.AbstractModule;
-import com.google.inject.Singleton;
-import com.google.inject.assistedinject.FactoryModuleBuilder;
+import com.google.inject.Inject;
+import de.contens.trade.trade.TradeMap;
+import org.bukkit.entity.Player;
+import org.bukkit.event.EventHandler;
+import org.bukkit.event.Listener;
+import org.bukkit.event.inventory.InventoryClickEvent;
+import org.bukkit.inventory.ItemStack;
 
 /**
  * @author Contens
  * @created 21.03.2021
  */
 
-public class TradeModule extends AbstractModule {
+public class InventoryClickListener implements Listener {
 
-    @Override
-    protected void configure() {
-        bind(TradeMap.class).in(Singleton.class);
+    private TradeMap tradeMap;
 
-        install(new FactoryModuleBuilder().build(Trade.Factory.class));
+    @Inject
+    public InventoryClickListener(TradeMap tradeMap) {
+        this.tradeMap = tradeMap;
+    }
+
+    @EventHandler
+    public void onInventoryClick(InventoryClickEvent event) {
+        Player player = (Player) event.getWhoClicked();
+
+        ItemStack itemStack = event.getCurrentItem();
+
+        player.sendMessage("Title: " + event.getView().getTitle());
+
+        /**
+         * Wieso, weshalb, warum entfernt Spigot den Support ab der 1.14 für Inventory#getName()
+         * -> Einen anderen Weg dafür finden. Vielleicht InventoryView#getTitle()?
+        if (event.getView().getTitle().equals("§6Handeln")) {
+            Trade trade = tradeMap.get(player.getName());
+
+            event.setCancelled(true);
+
+            if (event.getClickedInventory() != null) {
+                if (!event.getView().getTitle().equals("§6Handeln")) {
+                    trade.addItem(player, itemStack, event.getSlot());
+                } else {
+                    if (event.getSlot() == 47 || event.getSlot() == 51) {
+                        trade.handleConfirmation(player, event.getSlot());
+                    } else {
+                        trade.removeItem(player, event.getSlot());
+                    }
+                }
+            }
+        }
+         */
     }
 }

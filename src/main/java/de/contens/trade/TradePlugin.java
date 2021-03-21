@@ -38,14 +38,19 @@ import com.google.inject.Guice;
 import com.google.inject.Injector;
 import de.contens.trade.command.CommandModule;
 import de.contens.trade.trade.TradeModule;
+import de.contens.trade.trade.command.TradeParent;
+import de.contens.trade.trade.listener.InventoryClickListener;
+import de.contens.trade.trade.listener.InventoryCloseListener;
 import de.contens.trade.utils.reflection.Reflection;
 import org.bukkit.Bukkit;
 import org.bukkit.command.Command;
 import org.bukkit.command.CommandMap;
+import org.bukkit.entity.Player;
 import org.bukkit.event.Listener;
 import org.bukkit.plugin.java.JavaPlugin;
 
 import java.lang.reflect.Field;
+import java.util.HashMap;
 import java.util.logging.Logger;
 
 /**
@@ -57,6 +62,8 @@ public class TradePlugin extends JavaPlugin {
 
     private static Logger logger;
 
+    public HashMap<Player, Player> readyToTrade = new HashMap<>();
+
     @Override
     public void onEnable() {
         Injector injector = Guice.createInjector(new AbstractModule() {
@@ -67,7 +74,7 @@ public class TradePlugin extends JavaPlugin {
         }, new CommandModule(), new TradeModule());
 
         Command[] commands = new Command[] {
-
+                injector.getInstance(TradeParent.class)
         };
 
         for (Command command : commands) {
@@ -83,7 +90,8 @@ public class TradePlugin extends JavaPlugin {
         }
 
         Listener[] listeners = new Listener[] {
-
+                injector.getInstance(InventoryClickListener.class),
+                injector.getInstance(InventoryCloseListener.class)
         };
 
         for (Listener listener : listeners) {

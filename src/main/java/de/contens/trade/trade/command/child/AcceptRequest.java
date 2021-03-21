@@ -31,23 +31,52 @@
  *  *****************************************************************************
  */
 
-package de.contens.trade.trade;
+package de.contens.trade.trade.command.child;
 
-import com.google.inject.AbstractModule;
-import com.google.inject.Singleton;
-import com.google.inject.assistedinject.FactoryModuleBuilder;
+import com.google.inject.Inject;
+import de.contens.trade.TradePlugin;
+import de.contens.trade.command.ChildCommand;
+import de.contens.trade.trade.Trade;
+import de.contens.trade.trade.TradeMap;
+import org.bukkit.Bukkit;
+import org.bukkit.command.CommandSender;
+import org.bukkit.entity.Player;
 
 /**
  * @author Contens
  * @created 21.03.2021
  */
 
-public class TradeModule extends AbstractModule {
+public class AcceptRequest extends ChildCommand {
+
+    private TradePlugin trade;
+    private TradeMap tradeMap;
+
+    @Inject
+    public AcceptRequest(TradePlugin trade, TradeMap tradeMap) {
+        super("accept");
+
+        this.trade = trade;
+        this.tradeMap = tradeMap;
+    }
 
     @Override
-    protected void configure() {
-        bind(TradeMap.class).in(Singleton.class);
+    public void execute(CommandSender sender, String[] args) {
+        if (!(sender instanceof Player))
+            return;
 
-        install(new FactoryModuleBuilder().build(Trade.Factory.class));
+        Player player = (Player) sender;
+        Player targetPlayer = Bukkit.getPlayer(args[0]);
+
+        if (trade.readyToTrade.containsKey(player)) {
+            if (targetPlayer == null)
+                return;
+
+            if (Bukkit.getPlayer(args[0]) != player) {
+                new Trade(player, targetPlayer, trade, tradeMap);
+
+                trade.readyToTrade.remove(player);
+            }
+        }
     }
 }

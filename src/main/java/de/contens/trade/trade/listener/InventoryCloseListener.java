@@ -31,23 +31,38 @@
  *  *****************************************************************************
  */
 
-package de.contens.trade.trade;
+package de.contens.trade.trade.listener;
 
-import com.google.inject.AbstractModule;
-import com.google.inject.Singleton;
-import com.google.inject.assistedinject.FactoryModuleBuilder;
+import com.google.inject.Inject;
+import de.contens.trade.trade.Trade;
+import de.contens.trade.trade.TradeMap;
+import org.bukkit.entity.Player;
+import org.bukkit.event.EventHandler;
+import org.bukkit.event.Listener;
+import org.bukkit.event.inventory.InventoryCloseEvent;
 
 /**
  * @author Contens
  * @created 21.03.2021
  */
 
-public class TradeModule extends AbstractModule {
+public class InventoryCloseListener implements Listener {
 
-    @Override
-    protected void configure() {
-        bind(TradeMap.class).in(Singleton.class);
+    private TradeMap tradeMap;
 
-        install(new FactoryModuleBuilder().build(Trade.Factory.class));
+    @Inject
+    public InventoryCloseListener(TradeMap tradeMap) {
+        this.tradeMap = tradeMap;
+    }
+
+    @EventHandler
+    public void onInventoryClose(InventoryCloseEvent event) {
+        Player player = (Player) event.getPlayer();
+
+        if (tradeMap.containsKey(player.getName())) {
+            Trade trade = tradeMap.get(player.getName());
+
+            trade.abort();
+        }
     }
 }
