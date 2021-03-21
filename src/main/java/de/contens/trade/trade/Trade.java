@@ -31,67 +31,22 @@
  *  *****************************************************************************
  */
 
-package de.contens.trade;
+package de.contens.trade.trade;
 
-import com.google.inject.AbstractModule;
-import com.google.inject.Guice;
-import com.google.inject.Injector;
-import de.contens.trade.command.CommandModule;
-import de.contens.trade.trade.TradeModule;
-import de.contens.trade.utils.reflection.Reflection;
-import org.bukkit.Bukkit;
-import org.bukkit.command.Command;
-import org.bukkit.command.CommandMap;
-import org.bukkit.event.Listener;
-import org.bukkit.plugin.java.JavaPlugin;
-
-import java.lang.reflect.Field;
-import java.util.logging.Logger;
+import de.contens.trade.TradePlugin;
 
 /**
  * @author Contens
  * @created 21.03.2021
  */
 
-public class TradePlugin extends JavaPlugin {
+public class Trade {
 
-    private static Logger logger;
+    private TradePlugin trade;
+    private TradeMap tradeMap;
 
-    @Override
-    public void onEnable() {
-        Injector injector = Guice.createInjector(new AbstractModule() {
-            @Override
-            protected void configure() {
-                bind(TradePlugin.class).toInstance(TradePlugin.this);
-            }
-        }, new CommandModule(), new TradeModule());
-
-        Command[] commands = new Command[] {
-
-        };
-
-        for (Command command : commands) {
-            try {
-                Field commandMapField = Reflection.getField(Bukkit.getServer().getClass(), "commandMap");
-
-                CommandMap commandMap = (CommandMap) commandMapField.get(Bukkit.getServer());
-
-                commandMap.register(command.getName(), command);
-            } catch (Exception ex) {
-                ex.printStackTrace();
-            }
-        }
-
-        Listener[] listeners = new Listener[] {
-
-        };
-
-        for (Listener listener : listeners) {
-            this.getServer().getPluginManager().registerEvents(listener, this);
-        }
-    }
-
-    public static Logger getLog() {
-        return logger;
+    public Trade(TradePlugin trade, TradeMap tradeMap) {
+        this.trade = trade;
+        this.tradeMap = tradeMap;
     }
 }
