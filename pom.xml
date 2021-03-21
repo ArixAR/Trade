@@ -51,6 +51,14 @@
             <version>4.1.0</version>
             <scope>compile</scope>
         </dependency>
+
+        <!-- We all know it, we all use it, we all love it -->
+        <dependency>
+            <groupId>org.projectlombok</groupId>
+            <artifactId>lombok</artifactId>
+            <version>1.18.16</version>
+            <scope>provided</scope>
+        </dependency>
     </dependencies>
 
     <!-- Build -->
