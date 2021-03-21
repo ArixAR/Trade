@@ -35,6 +35,7 @@ package de.contens.trade.trade;
 
 import com.google.inject.AbstractModule;
 import com.google.inject.Singleton;
+import com.google.inject.assistedinject.FactoryModuleBuilder;
 
 /**
  * @author Contens
@@ -46,5 +47,7 @@ public class TradeModule extends AbstractModule {
     @Override
     protected void configure() {
         bind(TradeMap.class).in(Singleton.class);
+
+        install(new FactoryModuleBuilder().build(Trade.Factory.class));
     }
 }
