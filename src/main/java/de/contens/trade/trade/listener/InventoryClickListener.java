@@ -34,11 +34,13 @@
 package de.contens.trade.trade.listener;
 
 import com.google.inject.Inject;
+import de.contens.trade.trade.Trade;
 import de.contens.trade.trade.TradeMap;
 import org.bukkit.entity.Player;
 import org.bukkit.event.EventHandler;
 import org.bukkit.event.Listener;
 import org.bukkit.event.inventory.InventoryClickEvent;
+import org.bukkit.inventory.Inventory;
 import org.bukkit.inventory.ItemStack;
 
 /**
@@ -59,20 +61,16 @@ public class InventoryClickListener implements Listener {
     public void onInventoryClick(InventoryClickEvent event) {
         Player player = (Player) event.getWhoClicked();
 
+        Inventory inventory = event.getView().getTopInventory();
         ItemStack itemStack = event.getCurrentItem();
 
-        player.sendMessage("Title: " + event.getView().getTitle());
-
-        /**
-         * Wieso, weshalb, warum entfernt Spigot den Support ab der 1.14 für Inventory#getName()
-         * -> Einen anderen Weg dafür finden. Vielleicht InventoryView#getTitle()?
-        if (event.getView().getTitle().equals("§6Handeln")) {
+        if (inventory.getName().equals("§9Handel")) {
             Trade trade = tradeMap.get(player.getName());
 
             event.setCancelled(true);
 
             if (event.getClickedInventory() != null) {
-                if (!event.getView().getTitle().equals("§6Handeln")) {
+                if (!event.getClickedInventory().getName().equals("§9Handel")) {
                     trade.addItem(player, itemStack, event.getSlot());
                 } else {
                     if (event.getSlot() == 47 || event.getSlot() == 51) {
@@ -83,6 +81,5 @@ public class InventoryClickListener implements Listener {
                 }
             }
         }
-         */
     }
 }

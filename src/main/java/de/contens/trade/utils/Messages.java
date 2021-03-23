@@ -50,8 +50,8 @@ public enum Messages {
     TRADE_REQUEST("Dir wurde eine Handelsanfrage von §e{0} §7geschickt.", true, true),
     TRADE_MAKE_REQUEST("Du hast eine Handelsanfrage an §e{0} §7geschickt", true, true),
     TRADE_ACCEPT_HOVER("§eKlicke mich um die Handelsanfrage anzunehmen.", false, true),
-    TRADE_IGNORE("Deine Handelsanfrage wurde von §e{0} §7ignoriert.", true, true),
-    TRADE_ALREADY_PENDING("§cDu hast bereits eine Handelsanfrage geschickt.", true, true),
+    TRADE_IGNORE("Deine Handelsanfrage wurde von §e{0} §7nicht angenommen.", true, true),
+    TRADE_ALREADY_PENDING("§cEs läuft bereits eine Handelsanfrage.", true, true),
     TRADE_ABORT("§cDer Handel wurde abgebrochen.", true,true),
     TRADE_SUCCEED("§aDer Handle wurde abgeschlossen.", true, true),
 
