@@ -33,23 +33,20 @@
 
 package de.contens.trade;
 
+import co.aikar.commands.PaperCommandManager;
 import com.google.inject.AbstractModule;
 import com.google.inject.Guice;
 import com.google.inject.Injector;
-import de.contens.trade.command.CommandModule;
 import de.contens.trade.trade.TradeModule;
-import de.contens.trade.trade.command.TradeParent;
+import de.contens.trade.trade.command.TradeCommand;
 import de.contens.trade.trade.listener.InventoryClickListener;
 import de.contens.trade.trade.listener.InventoryCloseListener;
+import de.contens.trade.utils.nms.MinecraftVersion;
 import de.contens.trade.utils.reflection.Reflection;
-import org.bukkit.Bukkit;
-import org.bukkit.command.Command;
-import org.bukkit.command.CommandMap;
 import org.bukkit.entity.Player;
 import org.bukkit.event.Listener;
 import org.bukkit.plugin.java.JavaPlugin;
 
-import java.lang.reflect.Field;
 import java.util.HashMap;
 import java.util.logging.Logger;
 
@@ -64,31 +61,44 @@ public class TradePlugin extends JavaPlugin {
 
     public HashMap<Player, Player> readyToTrade = new HashMap<>();
 
+    private PaperCommandManager commandManager;
+
     @Override
     public void onEnable() {
+
+        // Check if server version is supported
+        switch (Reflection.getVersion()) {
+            case "v1_8_R1":
+            case "v1_8_R2":
+            case "v1_8_R3":
+            case "v1_9_R1":
+            case "v1_9_R2":
+            case "v1_10_R1":
+            case "v1_11_R1":
+            case "v1_12_R1":
+            case "v1_13_R1":
+            case "v1_13_R2":
+                break;
+            default:
+                getLog().warning("Diese Server Version wird nicht unterstützt: " + MinecraftVersion.formatVersion(Reflection.getVersion()).name().toLowerCase());
+                getLog().warning("Das Plugin wird nur teilweise funktionieren, aber es werden Fehler erwartet!");
+        }
+
+        // Initialize Guice
         Injector injector = Guice.createInjector(new AbstractModule() {
             @Override
             protected void configure() {
                 bind(TradePlugin.class).toInstance(TradePlugin.this);
             }
-        }, new CommandModule(), new TradeModule());
+        }, new TradeModule());
 
-        Command[] commands = new Command[] {
-                injector.getInstance(TradeParent.class)
-        };
+        // Load ACF command manager
+        commandManager = new PaperCommandManager(this);
 
-        for (Command command : commands) {
-            try {
-                Field commandMapField = Reflection.getField(Bukkit.getServer().getClass(), "commandMap");
+        // Register command
+        commandManager.registerCommand(injector.getInstance(TradeCommand.class));
 
-                CommandMap commandMap = (CommandMap) commandMapField.get(Bukkit.getServer());
-
-                commandMap.register(command.getName(), command);
-            } catch (Exception ex) {
-                ex.printStackTrace();
-            }
-        }
-
+        // Register listeners
         Listener[] listeners = new Listener[] {
                 injector.getInstance(InventoryClickListener.class),
                 injector.getInstance(InventoryCloseListener.class)

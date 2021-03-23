@@ -31,26 +31,42 @@
  *  *****************************************************************************
  */
 
-package de.contens.trade.command;
+package de.contens.trade.utils.nms;
 
-import org.bukkit.command.CommandSender;
+import com.google.common.collect.ImmutableSet;
+import de.contens.trade.utils.reflection.Reflection;
+
+import java.util.Arrays;
+import java.util.List;
+import java.util.Set;
 
 /**
  * @author Contens
- * @created 21.03.2021
+ * @created 22.03.2021
  */
 
-public abstract class ChildCommand {
+public enum MinecraftVersion {
+    V1_8("v1_8_R1", "v1_8_R2", "v1_8_R3"),
+    v1_9("v1_9_R1", "v1_9_R2"),
+    v1_10("v1_10_R1"),
+    v1_11("v1_11_R1"),
+    v1_12("v1_12_R1"),
+    v1_13("v1_13_R1", "v1_13_R2");
 
-    private String name;
+    private List<String> aliases;
 
-    public ChildCommand(String name) {
-        this.name = name;
+    MinecraftVersion(String... aliases) {
+        this.aliases = Arrays.asList(aliases);
     }
 
-    public abstract void execute(CommandSender sender, String[] args);
+    public static MinecraftVersion formatVersion(String version) {
+        return Arrays.stream(MinecraftVersion.values())
+                .filter(v -> v.aliases.contains(version))
+                .findFirst()
+                .get();
+    }
 
-    public String getName() {
-        return name;
+    public static int getMajorVersion() {
+        return Integer.parseInt(Reflection.getVersion().split("_")[1]);
     }
 }

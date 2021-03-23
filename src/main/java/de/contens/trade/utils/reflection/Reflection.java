@@ -66,7 +66,7 @@ public class Reflection {
                 return null;
             }
             String name = Bukkit.getServer().getClass().getPackage().getName();
-            _versionString = name.substring(name.lastIndexOf('.') + 1) + ".";
+            _versionString = name.substring(name.lastIndexOf('.') + 1);
         }
 
         return _versionString;
