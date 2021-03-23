@@ -1,7 +1,7 @@
 name: Trade
 version: 1.0
 main: de.contens.trade.TradePlugin
-api-version: 1.16
+api-version: 1.13
 author: Contens
 description: Simple trade plugin
 website: https://contens.dev
