@@ -51,7 +51,10 @@ public enum MinecraftVersion {
     v1_10("v1_10_R1"),
     v1_11("v1_11_R1"),
     v1_12("v1_12_R1"),
-    v1_13("v1_13_R1", "v1_13_R2");
+    v1_13("v1_13_R1", "v1_13_R2"),
+    v1_14("v1_14_R1"),
+    v1_15("v1_15_R1"),
+    v1_16("v1_16_R1", "v1_16_R2", "v1_16_R3");
 
     private List<String> aliases;
 

@@ -57,7 +57,7 @@ import java.util.logging.Logger;
 
 public class TradePlugin extends JavaPlugin {
 
-    private static Logger logger;
+    private Logger logger;
 
     public HashMap<Player, Player> readyToTrade = new HashMap<>();
 
@@ -65,6 +65,7 @@ public class TradePlugin extends JavaPlugin {
 
     @Override
     public void onEnable() {
+        logger = getLogger();
 
         // Check if server version is supported
         switch (Reflection.getVersion()) {
@@ -109,7 +110,7 @@ public class TradePlugin extends JavaPlugin {
         }
     }
 
-    public static Logger getLog() {
+    public Logger getLog() {
         return logger;
     }
 }
